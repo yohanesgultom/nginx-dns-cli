@@ -15,7 +15,10 @@ def cli():
     pass
 
 @cli.command()
+@click.argument('subdomain')
 @click.argument('domain')
+@click.argument('target_ip')
+@click.argument('target_port')
 def create_reverse_proxy(subdomain, domain, target_ip, target_port):
     # update cloudflare dns record
     click.echo(f'Updating CloudFlare DNS record...')
@@ -63,8 +66,23 @@ def create_reverse_proxy(subdomain, domain, target_ip, target_port):
     os.system(cmd)
 
 @cli.command()
-def delete_reverse_proxy():
-    click.echo('Dropped the database')
+@click.argument('subdomain')
+@click.argument('domain')
+def delete_reverse_proxy(subdomain, domain):
+    # update letsencrypt certificate
+    click.echo(f'Updating LetsEncrypt certificate...')
+    cmd = f'sudo certbot --nginx --cert-name {domain}'
+    sp = subprocess.Popen('sudo certbot certificates | grep Domains', shell=True, stdout=subprocess.PIPE)
+    spout = sp.stdout.read().decode('utf-8')
+    for token in spout.split():
+        token = token.strip()
+        if (not token.startswith(subdomain)) and token.endswith(domain):
+            cmd += f' -d {token}'
+    cmd += f' -d {subdomain}.{domain}'
+    click.echo(f'Running: {cmd}')
+    os.system(cmd)
+    # TODO delete cloudflare
+    # TODO delete nginx conf
 
 if __name__ == '__main__':
     cli()
