@@ -20,12 +20,19 @@ def cli():
 @click.argument('target_ip')
 @click.argument('target_port')
 def create_reverse_proxy(subdomain, domain, target_ip, target_port):
+    """Create new reverse proxy SUBDOMAIN.DOMAIN pointing to TARGET_IP (internally to TARGET_PORT).
+
+    SUBDOMAIN Subdomain name excluding the domain name eg. subdomain
+    DOMAIN Domain name eg. domain.com (will make subdomain.domain.com)
+    TARGET_IP IPv4 address eg. 1.1.1.1
+    TARGET_PORT Internal port set in Nginx eg. 8080
+    """    
     # update cloudflare dns record
     try:
         click.echo(f'Updating CloudFlare DNS record...')
         payload = {
             "type":"A",
-            "name": subdomain + '.' + domain,
+            "name": subdomain,
             "content":target_ip,
             "ttl":1,
             "proxied":False
@@ -75,6 +82,11 @@ def create_reverse_proxy(subdomain, domain, target_ip, target_port):
 @click.argument('subdomain')
 @click.argument('domain')
 def delete_reverse_proxy(subdomain, domain):
+    """Create new reverse proxy SUBDOMAIN.DOMAIN pointing to TARGET_IP (internally to TARGET_PORT).
+
+    SUBDOMAIN Subdomain name excluding the domain name eg. subdomain
+    DOMAIN Domain name eg. domain.com (will make subdomain.domain.com)
+    """    
     # update letsencrypt certificate
     click.echo(f'Updating LetsEncrypt certificate...')
     cmd = f'sudo certbot --nginx --cert-name {domain}'
