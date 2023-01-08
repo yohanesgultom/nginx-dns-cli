@@ -1,0 +1,10 @@
+# nginx-dns-cli
+
+CLI to easily manage Nginx reverse proxy with Cloudflare DNS and Let's Encrypt Free SSL in a Debian-based server
+
+## Pre-requisites
+
+1. Nginx
+1. Python 3.x
+1. Let's Encrypt Certbot
+
