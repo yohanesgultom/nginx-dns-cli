@@ -15,17 +15,18 @@ def cli():
     pass
 
 @cli.command()
-@click.argument('subdomain')
-@click.argument('domain')
-@click.argument('target_ip')
-@click.argument('target_port')
+@click.argument('subdomain', metavar='<subdomain>')
+@click.argument('domain', metavar='<domain>')
+@click.argument('target_ip', metavar='<target_ip>')
+@click.argument('target_port', metavar='<target_port>')
 def create_reverse_proxy(subdomain, domain, target_ip, target_port):
-    """Create new reverse proxy SUBDOMAIN.DOMAIN pointing to TARGET_IP (internally to TARGET_PORT).
+    """Create new reverse proxy <subdomain>.<domain> pointing to <target_ip> (internally to <target_port>).
 
-    SUBDOMAIN Subdomain name excluding the domain name eg. subdomain
-    DOMAIN Domain name eg. domain.com (will make subdomain.domain.com)
-    TARGET_IP IPv4 address eg. 1.1.1.1
-    TARGET_PORT Internal port set in Nginx eg. 8080
+    \b
+    - subdomain: Subdomain name without the domain name eg. "subdomain"
+    - domain: Domain name eg. "domain.com" (will make subdomain.domain.com)
+    - target_ip: IPv4 address eg. "1.1.1.1"
+    - target_port: Internal port set in Nginx eg. "8080"
     """    
     # update cloudflare dns record
     try:
@@ -79,13 +80,14 @@ def create_reverse_proxy(subdomain, domain, target_ip, target_port):
     os.system(cmd)
 
 @cli.command()
-@click.argument('subdomain')
-@click.argument('domain')
+@click.argument('subdomain', metavar='<subdomain>')
+@click.argument('domain', metavar='<domain>')
 def delete_reverse_proxy(subdomain, domain):
-    """Create new reverse proxy SUBDOMAIN.DOMAIN pointing to TARGET_IP (internally to TARGET_PORT).
+    """Delete reverse proxy config for <subdomain>.<domain>
 
-    SUBDOMAIN Subdomain name excluding the domain name eg. subdomain
-    DOMAIN Domain name eg. domain.com (will make subdomain.domain.com)
+    \b
+    - subdomain: Subdomain name without the domain name eg. "subdomain"
+    - domain: Domain name eg. "domain.com" (will make subdomain.domain.com)
     """    
     # update letsencrypt certificate
     click.echo(f'Updating LetsEncrypt certificate...')
