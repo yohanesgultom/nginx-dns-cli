@@ -3,7 +3,7 @@ import json
 import shutil
 import subprocess
 import os
-from urllib import request
+from urllib import request, error
 
 CLOUDFLARE_TOKEN = os.getenv('CLOUDFLARE_TOKEN')
 CLOUDFLARE_ZONE = os.getenv('CLOUDFLARE_ZONE')
@@ -21,36 +21,42 @@ def cli():
 @click.argument('target_port')
 def create_reverse_proxy(subdomain, domain, target_ip, target_port):
     # update cloudflare dns record
-    click.echo(f'Updating CloudFlare DNS record...')
-    payload = {
-        "type":"A",
-        "name": subdomain + '.' + domain,
-        "content":target_ip,
-        "ttl":1,
-        "proxied":False
-    }
-    req = request.Request(CLOUDFLARE_API_URL, method='POST', data=bytes(json.dumps(payload), encoding='utf-8'))
-    req.add_header('Content-Type', 'application/json')
-    req.add_header('Authorization', f'Bearer {CLOUDFLARE_TOKEN}')
-    res = request.urlopen(req)
-    click.echo(res.read())
+    try:
+        click.echo(f'Updating CloudFlare DNS record...')
+        payload = {
+            "type":"A",
+            "name": subdomain + '.' + domain,
+            "content":target_ip,
+            "ttl":1,
+            "proxied":False
+        }
+        req = request.Request(CLOUDFLARE_API_URL, method='POST', data=bytes(json.dumps(payload), encoding='utf-8'))
+        req.add_header('Content-Type', 'application/json')
+        req.add_header('Authorization', f'Bearer {CLOUDFLARE_TOKEN}')
+        res = request.urlopen(req)
+        click.echo(res.read())
+    except error.HTTPError as e:
+        click.echo(message='Update failed: maybe record has already existed', err=True)
 
     # update nginx config
-    nginx_conf_file = os.path.join(NGINX_HOME, 'sites-available', subdomain)
-    click.echo(f'Copying Nginx config file: {nginx_conf_file}...')
-    shutil.copyfile('nginx.template.conf', nginx_conf_file)
-    with open(nginx_conf_file, 'r') as f:
-        data = f.read()
-        data = data.replace('{{server_name}}', subdomain + '.' + domain)
-        data = data.replace('{{port}}', str(target_port))
-    with open(nginx_conf_file, 'w') as f:
-        f.write(data)
-    cmd = f'cd {NGINX_HOME}/sites-enabled && sudo ln -s ../sites-available/{subdomain}'
-    click.echo(f'Running: {cmd}')
-    os.system(cmd)
-    cmd = f'sudo service nginx restart'
-    click.echo(f'Running: {cmd}')
-    os.system(cmd)
+    try:
+        nginx_conf_file = os.path.join(NGINX_HOME, 'sites-available', subdomain)
+        click.echo(f'Copying Nginx config file: {nginx_conf_file}...')
+        shutil.copyfile('nginx.template.conf', nginx_conf_file)
+        with open(nginx_conf_file, 'r') as f:
+            data = f.read()
+            data = data.replace('{{server_name}}', subdomain + '.' + domain)
+            data = data.replace('{{port}}', str(target_port))
+        with open(nginx_conf_file, 'w') as f:
+            f.write(data)
+        cmd = f'cd {NGINX_HOME}/sites-enabled && sudo ln -s ../sites-available/{subdomain}'
+        click.echo(f'Running: {cmd}')
+        os.system(cmd)
+        cmd = f'sudo service nginx restart'
+        click.echo(f'Running: {cmd}')
+        os.system(cmd)
+    except Exception as e:
+        click.echo(message=str(e), err=True)
 
     # update letsencrypt certificate
     click.echo(f'Updating LetsEncrypt certificate...')
