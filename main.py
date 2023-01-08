@@ -6,7 +6,7 @@ import os
 from urllib import request
 
 CLOUDFLARE_TOKEN = os.getenv('CLOUDFLARE_TOKEN')
-CLOUDFLARE_ZONE = '4a5f0497ea189f6b301fae78cb64ea83'
+CLOUDFLARE_ZONE = os.getenv('CLOUDFLARE_ZONE')
 CLOUDFLARE_API_URL = f'https://api.cloudflare.com/client/v4/zones/{CLOUDFLARE_ZONE}/dns_records'
 NGINX_HOME = '/etc/nginx'
 

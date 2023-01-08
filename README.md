@@ -8,3 +8,7 @@ CLI to easily manage Nginx reverse proxy with Cloudflare DNS and Let's Encrypt F
 1. Python 3.x
 1. Let's Encrypt Certbot
 
+## Usage
+
+1. export CLOUDFLARE_TOKEN=yourtoken
+1. export CLOUDFLARE_ZONE=yourzoneid
