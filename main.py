@@ -38,7 +38,7 @@ def create_reverse_proxy(subdomain, domain, target_ip, target_port):
     # update nginx config
     nginx_conf_file = os.path.join(NGINX_HOME, 'sites-available', subdomain)
     click.echo(f'Copying Nginx config file: {nginx_conf_file}...')
-    shutil.copyfile('nginx.example.conf', nginx_conf_file)
+    shutil.copyfile('nginx.template.conf', nginx_conf_file)
     with open(nginx_conf_file, 'r') as f:
         data = f.read()
         data = data.replace('{{server_name}}', subdomain + '.' + domain)
